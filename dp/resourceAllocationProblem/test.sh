@@ -1,8 +1,8 @@
 #!/bin/bash
 
-for i in 10,100,1000,10000
+for (( i = 10;i <= 10000;i=i*10))
 do
-    for j in 10,100,1000,10000
+    for ((j = 10;j <= 10000;j=j*10))
     do
         echo "i = $i and j = $j"
         ./a.out $i $j 1
