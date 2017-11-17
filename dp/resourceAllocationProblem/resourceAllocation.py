@@ -9,78 +9,105 @@ def createC(n,m):
     """
     :type n:int 设备数
     :type m:int 车间数
-    :rtype: [[]] c[i][j] means 第i个车间有j台设备时产生的盈利
+    :rtype: [[]] c[i][j] 第i+1个车间分配了j+1台设备产生的盈利
     """
-    return [[ random.randint(0,1000) for j in range(m) ] for i in range(n)]
+    return [[ random.randint(0,1000) for j in range(n) ] for i in range(m)]
 
-def maxProfits(c):
+def maxProfits(c,n,m):
     """
+    :type n int #设备数
+    :type m int #车间数
     :type c List[List[int]]
     :rtype int
     """
-    m = len(c) # 设备数
-    n = len(c[0]) # 车间数
-    profits = [[0 for j in range(n+1)] for i in range(m+1)]
+    dp = [[ 0 for j in range(n+1)] for i in range(m+1)]
+    ans = [0 for i in range(m)]
     for i in range(1,m+1):
         for j in range(1,n+1):
-            t =[c[k-1][j-1]+profits[i-k][j-1] for k in range(1,i)]
-            t.append(profits[i][j-1])
-            profits[i][j] = max(t)
-    print(m,n)
-    return profits[-1][-1]
+            dp[i][j] = dp[i-1][j]
+            for k in range(1,j+1):
+                dp[i][j] = max(dp[i][j],c[i-1][k-1] + dp[i-1][j-k])
+#    print dp
+    return dp[-1][-1]
 
-def maxProfits2(c):
-    """
-    :type c List[List[int]]
-    :rtype int
-    """
-    m = len(c)
-    n = len(c[0])
-    profits = [[0 for j in range(m+1)] for i in range(n+1)]
-    #profits[i][j] 前i个车间分配j个设备时的最大盈利
-    for i in range(1,n+1):
-        for j in range(1,m+1):
-            t = [c[k-1][i-1] + profits[i-1][j-k] for k in range(1,j)]
-            t.append(profits[i-1][j])
-            profits[i][j] = max(t)
-    return profits[-1][-1]
+def maxProfits2(c,n,m):
+    dp = [0 for i in range(n+1)]
+    for i in range(1,m+1):
+        for j in range(n,0,-1):
+            t = dp[j]
+            for k in range(1,j+1):
+                t = max(t,dp[j-k] + c[i-1][k-1])
+            dp[j] = t
+    return dp[-1]
 
-def maxProfits3(c):
-    """
-    :type List[List[int]]
-    :rtype int
-    """
-    m = len(c)
-    n = len(c[0])
-    profits = [0 for j in range(m+1)]
-    for i in range(1,n+1):
-        for j in range(1,m+1):
-            t = [c[k-1][i-1] + profits[j-k] for k in range(1,j)]
-            t.append(profits[j])
-            profits[j] = max(t)
-    return profits[-1]
+class MaxProfit:
+    def __init__(self,c,n,m):
+        self.c = c
+        self.n = n # 设备数
+        self.m = m # 车间数
+        self.ans = []
+        self.maxAns = []
+        self.maxProfits = 0
+    def reset(self,c,n,m):
+        self.c = c
+        self.n = n
+        self.m = m
+        self.ans = []
+        self.maxAns = []
+        self.maxProfits = 0
+    def check(self,k):
+        if sum(self.ans) + k > self.n:
+            return False
+        else:
+            return True
+    def GetAns(self):
+        if len(self.ans) == self.m or sum(self.ans) == self.n:
+            profit = self.calAns()
+            if profit > self.maxProfits:
+                self.maxProfits = profit
+                self.ansVec = self.ans[:]
 
-def maxProfitBF(c,m,n):
-    """
-    :type c: List[List[int]]
-    :type m: int #设备数
-    :type n: int #车间数
-    :rtype int
-    """
-    if m == 0 or n == 0:
-        return 0
-    t = [c[k-1][n-1] + maxProfitBF(c,m-k,n-1) for k in range(1,m)]
-    t.append(maxProfitBF(c,m,n-1))
-    return max(t)
+                #print '#',self.ans
+        else:
+            for i in range(self.n + 1):
+                if self.check(i):
+                    self.ans.append(i)
+                    self.GetAns()
+        if len(self.ans) != 0:
+            self.ans.pop()
+    def calAns(self):
+        profit = 0
+        for i in range(len(self.ans)):
+            if self.ans[i] != 0:
+                profit += self.c[i][self.ans[i] - 1]
+        return profit
 
+def test():
+    """test"""
+    c = [[30,40,50],[20,30,50],[20,25,30]]
+    print maxProfits(c,3,3)
+    mp = MaxProfit(c,3,3)
+    mp.GetAns()
+    print mp.ansVec
+    print mp.maxProfits
+    for i in range(10):
+        n = random.randint(1,8)
+        m = random.randint(1,8)
+        c = createC(n,m)
+        p1 = maxProfit2(c,n,m)
+        mp.reset(c,n,m)
+        mp.GetAns()
+        if p1 != mp.maxProfits:
+            print "error:"
+            print p1,mp.maxProfits
+            print mp.maxAns
+            print c
+            print "================================="
 
 if __name__ == '__main__':
+    test()
     m = int(sys.argv[1])
     n = int(sys.argv[2])
     c = createC(m,n)
-    #print c
-    #print maxProfits(c)
-    #print maxProfits2(c)
-    #print maxProfitBF(c,3,4)
     t = timeit('maxProfits2(c)','from __main__ import maxProfits2,c',number = 100)
     print t

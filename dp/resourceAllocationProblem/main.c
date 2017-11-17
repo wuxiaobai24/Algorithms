@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <stdlib.h>
+#include <ctime>
+
 
 using namespace std;
 
@@ -11,15 +13,14 @@ void newC(vector<vector<int>> &c) {
 }
 
 int maxProfit(vector<vector<int>> &c,int m,int n) {
-    vector<int> profits(m+1,0);
-    for(int i = 1;i <= n;i++)
-        for(int j = 1;j <= m;j++) {
-            for(int k = 1;k < j;k++) {
-                int t = c[k-1][i-1] + profits[j-k];
-                profits[j] = max(profits[j],t);
-            }
+    vector<vector<int>> dp(m+1,vector<int>(n+1,0));
+    for(int i = 1;i <= m;i++)
+        for(int j = 1;j <= n;j++) {
+            dp[i][j] = dp[i-1][j];
+            for(int k = 1;k <= j;k++)
+                dp[i][j] = max(dp[i][j],c[i-1][k-1] + dp[i-1][j-k]);
         }
-    return *profits.rbegin();
+    return dp[m-1][n-1];
 }
 
 int main(int argc,char **argv) {
@@ -30,10 +31,18 @@ int main(int argc,char **argv) {
     int n = atoi(argv[1]);  //n个设备
     int m = atoi(argv[2]);  //m个车间
     int k = atoi(argv[3]);  //测试k轮
-    vector<vector<int> > c(n,vector<int>(m,0));
-    newC(c);
-    if (argc == 5 && string(argv[4]) == "test") {
+    vector<vector<int> > c(m,vector<int>(n,0));
+  //  for(int i = 0;i < n;i++)
+  //      for(int j = 0;j < m;j++)
+  //          cin >> c[i][j];
+   // newC(c);
+    
+    for(int j = 0;j < 20;j++) {
+        clock_t begTime = clock();
+        for(int i = 0;i < k;i++)
+            maxProfit(c,m,n);
+        clock_t endTime = clock();
+        cout << (endTime-begTime)*1.0/CLOCKS_PER_SEC << endl;
     }
-    cout << maxProfit(c,m,n) << endl;
     return 0;
 }
