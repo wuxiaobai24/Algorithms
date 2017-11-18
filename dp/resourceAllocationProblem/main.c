@@ -186,8 +186,8 @@ int main(int argc,char **argv) {
     vector<vector<int> > c(m,vector<int>(n,0));
     //c[i][j] i 车间分配j个设备
     if (argc == 7 && string(argv[6]) == "test") {
-        for(int i = 0;i < n;i++)
-            for(int j = 0;j < m;j++)
+        for(int i = 0;i < m;i++)
+            for(int j = 0;j < n;j++)
                 cin >> c[i][j];
     } else
         newC(c);

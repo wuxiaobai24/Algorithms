@@ -5,6 +5,13 @@ import random
 from timeit import timeit
 import sys
 
+def ReadFromFile(filename):
+    c = []
+    with open(filename,'r') as f:
+        for line in f:
+            c.append(list(map(int,line.split())))
+    return c
+
 def createC(n,m):
     """
     :type n:int 设备数
@@ -94,7 +101,7 @@ def test():
         n = random.randint(1,8)
         m = random.randint(1,8)
         c = createC(n,m)
-        p1 = maxProfit2(c,n,m)
+        p1 = maxProfits2(c,n,m)
         mp.reset(c,n,m)
         mp.GetAns()
         if p1 != mp.maxProfits:
@@ -108,6 +115,11 @@ if __name__ == '__main__':
     test()
     m = int(sys.argv[1])
     n = int(sys.argv[2])
-    c = createC(m,n)
-    t = timeit('maxProfits2(c)','from __main__ import maxProfits2,c',number = 100)
-    print t
+    c = ReadFromFile(sys.argv[3])
+    print maxProfits2(c,n,m)
+    #c = createC(m,n)
+    #for v in c:
+    #    for i in c:
+    #        i = int(input())
+    #t = timeit('maxProfits2(c)','from __main__ import maxProfits2,c',number = 100)
+    #print t
