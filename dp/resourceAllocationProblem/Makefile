@@ -1,5 +1,8 @@
 f():
-	g++ main.c -g -std=c++11
+	g++ main.c -std=c++11
+
+debug:
+	g++ main.c -std=c++11 -g
 
 testRun:
 	./a.out 3 3 1 1 1 test < testData

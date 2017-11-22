@@ -47,6 +47,11 @@ def maxProfits2(c,n,m):
             dp[j] = t
     return dp[-1]
 
+def maxProfits3(c,n,m):
+    dp = [0]*(n+1)
+    for i in range(1,m+1):
+        pass
+
 class MaxProfit:
     def __init__(self,c,n,m):
         self.c = c

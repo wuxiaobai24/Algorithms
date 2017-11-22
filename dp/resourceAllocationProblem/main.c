@@ -183,6 +183,7 @@ int main(int argc,char **argv) {
     else if (fi == 3) f = maxProfit3;
     else if (fi == 4) f = maxProfit4;
     else return 1;
+
     vector<vector<int> > c(m,vector<int>(n,0));
     //c[i][j] i 车间分配j个设备
     if (argc == 7 && string(argv[6]) == "test") {
