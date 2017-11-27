@@ -7,3 +7,5 @@ testRun:
 	./a.out 3 3 1 1 3 test < testData
 	./a.out 3 3 1 1 4 test < testData
 	./a.out 3 3 1 1 5 test < testData
+	./a.out 3 3 1 1 6 test < testData
+	./a.out 3 3 1 1 7 test < testData
