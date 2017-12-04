@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iterator>
 #include <vector>
+#include <sstream>
 #include <queue>
 #include <bitset>
 #include <map>
@@ -49,13 +50,14 @@ void pack(HuffmanTreeNode *root,ofstream &fout) {
 HuffmanTreeNode *unpack(ifstream &fin) {
     string line;
     if (!getline(fin,line)) {
-        err<<"pack"<<endl;
+        cerr<<"unpack"<<endl;
         exit(1);
     }
     if (line.size() == 0) return nullptr;
     istringstream iss(line);
-    auto root = new HuffmanTreeNode(nullptr,nullptr);
+    auto root = new HuffmanTreeNode(0,' ');
     iss >> root->weight >> root->data;
+    cout << root->weight << root->data << endl;
     root->left = unpack(fin);
     root->right = unpack(fin);
     return root;
@@ -98,33 +100,38 @@ void genHuffmanCode(HuffmanTreeNode *root,string &str) {
 void encode(const string& infile,const string& outfile) {
     ofstream fhelp("help.huffman");
     ofstream fout(outfile,ios::binary);
-    
+    ifstream fin(infile); 
     string contents;
-    readFormFile(infile,contents);
+    readFromFile(infile,contents);
     calcCount(contents);
     auto root = bulidHuffmanTree();
     
     //先将huffman code 写入outfil
-    fhelp << contens.size() << endl;
+    fhelp << contents.size() << endl;
     pack(root,fhelp);
     string str;
-    getHuffmanCode(root,str);
+    genHuffmanCode(root,str);
     //进行压缩
     char ch;
     char buffer;
     int k = 0;
+    int count = 0,byte = 0;
     while(fin >> ch) {
         const string &str = code[ch];
+        count += str.size();
         for(auto c:str) {
             if (c == 1) buffer | 1;
             buffer << 1;
-            k = (k + 1) % sizeof(char);
-            if (!k) fout.write(&buffer,sizeof(char));
+            k = (k + 1) % 8;
+            if (!k) {
+                fout.write(&buffer,sizeof(char));
+                byte += 1;
+            }
         }
     }
-    buffer << (sizeof(char) - k);
+    buffer << (8 - k);
     fout.write(&buffer,sizeof(char));
-
+    cout << count << " " << byte << endl;
     fhelp.close(); fin.close(); fout.close();
 }
 
@@ -133,33 +140,42 @@ int mask[8] = {1,2,4,16,32,64,128,256};
 void decode(const string& infile,const string &outfile) {
     ifstream fin(infile,ios::binary);
     ofstream fout(outfile);
-    ifstream fhelp("hele.huffman");
+    ifstream fhelp("./help.huffman");
     int contents_size;
     string str; getline(fhelp,str);
     istringstream iss(str);
     iss >> contents_size;
+    cout << contents_size << endl;
     auto root = unpack(fhelp);
     char buffer;
     char c;
     int k = 0;
-    HuffmanTreeNode *p = nullptr;
-    fin.read(&buffer,sizeof(char));
-    do {
-        if (p == nullptr) p = root;
-        if (p->left == nullptr &&  p->right == nullptr)
-            fout << p->data;
-        if (mask[k] & buffer) p = p->right;
-        else p = p->left;
-        k = (k + 1) % 8;
-    } while(k != 0);
+    HuffmanTreeNode *p = root;
+    while( fin.read(&buffer,sizeof(char)) ) {
+        do {
+            if (p->left == nullptr &&  p->right == nullptr) {
+     //           cout << p->data;
+                fout << p->data;
+                p = root;
+                contents_size--;
+                if (contents_size == 0) break;
+            }
+            if (mask[k] & buffer) p = p->right;
+            else p = p->left;
+            k = (k + 1) % 8;
+        } while(k != 0);
+    }
 }
 
 int main (int argc,char **argv) {
-    if (argc < 2) {
+    if (argc < 4) {
         exit(1);
     }
-    f (argc == 4 && "decode" == string(argv[2]) )
-        decode(string(argv[3]));
-     if (argc == 4 && "encode()" == string(argv[2]))
-        encode(string(argv[3]),contents);
+    if (string(argv[1]) == "-enc") {
+        encode(string(argv[2]),string(argv[3]));
+    } else if(string(argv[1]) == "-dec") {
+        decode(string(argv[2]),string(argv[3]));
+    } else {
+        ;
+    }
 }
